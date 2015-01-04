@@ -71,7 +71,7 @@ Accuracy was used to select the optimal model using  the largest value.
 The final value used for the model was mtry = 26. 
 ```
    
-Here are the commands that I used to perform cross validation (step 4 above) and to estimate the error rate, along with the associated output from those command.
+Here are the commands that I used to perform cross validation (step 4 above) and to estimate the error rate, along with the associated output from those commands.
 
 ```
 pred_final_validation<-predict(modelFit,final_validation)
@@ -87,6 +87,6 @@ pred_final_validation    A    B    C    D    E
                     E    1    0    0    1  899
                                    
 ```
-**Per the matrix above, 4875 of the predictions were accurate (e.g. the ones along the diagonal) and 29 were inaccurate.  Thus the error rate on the validation sample is 29/4875=0.6%%.  We can use this as an estimate of our Out of Error Sample Rate.**
+**Per the matrix above, 4875 of the predictions were accurate (e.g. the ones along the diagonal) and 29 were inaccurate.  Thus the error rate on the validation sample is 29/4875=0.6%.  We can use this as an estimate of our Out of Error Sample Rate.**
 
 
