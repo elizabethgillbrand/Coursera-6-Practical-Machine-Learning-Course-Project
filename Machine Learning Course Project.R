@@ -9,6 +9,7 @@ test <- read.csv("./data/test.csv")
 set.seed(1965)
 sm_test<-test[,-c(1:7,12:36,49:59,69:83, 87:101,103:112,125:139,141:150,160)]
 sm_train<-train[,-c(1:7,12:36,49:59,69:83, 87:101,103:112,125:139,141:150)]
+library("caret", lib.loc="/Library/Frameworks/R.framework/Versions/3.1/Resources/library")
 inTrain<-createDataPartition(sm_train$classe, p=0.75, list=FALSE)
 final_train<-sm_train[inTrain,]
 final_validation<-sm_train[-inTrain,]

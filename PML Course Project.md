@@ -5,11 +5,11 @@ Overview
 -------------------------
 Here are the steps that I took for this project:
 
-1. **Groom data**  First I selected only the variables/columns that are summary measures) to reduce the number of variables from 160 to 68.  Then I reduced the number of rows to include only the rows that include values for the summary measures. This reduced the number of rows in the training set from from 19622 to 406.  I conducted these two data compression technics in order to allow the model fitting step to run more quickly versus using the full data set.
+1. **Groom data**  First I selected only the variables/columns that are *not* summary measures to reduce the number of variables from 160 to 51.  The summary measures are not populated in the test data set so there it is counter-productive to include them in when training the model.
 
 2. **Split data** I allocated 75% of the training data set to use for model building. I held back 25% of the training data to do cross validation
 
-3. **Train the model** I used the Random Forest method to create my model.
+3. **Train the model** I used the Random Forest method to create my model.  This took about 90 minutes!
 
 4. **Cross Validate and Estimate Error Rate**  Then I used my model to predict the  outcome for each observation in the validation data set.  I compared my predicted "classe" values against actual in order to calculate the error rate.  The error rate that I calculated here is a good estimate of the "out of sample error".
 
@@ -28,22 +28,16 @@ download.file(fileUrl_test, destfile = "./data/test.csv", method = "curl")
 list.files("./data")
 train <- read.csv("./data/train.csv")
 test <- read.csv("./data/test.csv")
-set.seed(1965)   
-
-sm_train<-train[,c(18:19,21:22,24:25,27:36,50:59,75:83,93:94,96:97,99:100,103:112,131:132,134:135,137:138,141:150,160)]   
-
-sm_test<-test[,c(18:19,21:22,24:25,27:36,50:59,75:83,93:94,96:97,99:100,103:112,131:132,134:135,137:138,141:150,160)]   
-
-index<-!sm_train$max_roll_belt=="NA"
-index_2<-!is.na(index)
-s_sm_train<-sm_train[index_2,]
-sm_test<-sm_test[,-68]
+set.seed(1965)
+sm_test<-test[,-c(1:7,12:36,49:59,69:83, 87:101,103:112,125:139,141:150,160)]
+sm_train<-train[,-c(1:7,12:36,49:59,69:83, 87:101,103:112,125:139,141:150)]
 ```
 Here is the code that I used to split the dataset (step 2 above)   
 ```
-inTrain<-createDataPartition(s_sm_train$classe, p=0.75, list=FALSE)
-final_train<-s_sm_train[inTrain,]
-final_validation<-s_sm_train[-inTrain,]
+library("caret", lib.loc="/Library/Frameworks/R.framework/Versions/3.1/Resources/library")
+inTrain<-createDataPartition(sm_train$classe, p=0.75, list=FALSE)
+final_train<-sm_train[inTrain,]
+final_validation<-sm_train[-inTrain,]
 ```
    
 
@@ -57,24 +51,24 @@ modelFit<-train(classe~.,data=final_train, method="rf")
 ```
 Random Forest 
 
-307 samples
- 67 predictor
-  5 classes: 'A', 'B', 'C', 'D', 'E' 
+14718 samples
+   51 predictor
+    5 classes: 'A', 'B', 'C', 'D', 'E' 
 
 No pre-processing
 Resampling: Bootstrapped (25 reps) 
 
-Summary of sample sizes: 307, 307, 307, 307, 307, 307, ... 
+Summary of sample sizes: 14718, 14718, 14718, 14718, 14718, 14718, ... 
 
 Resampling results across tuning parameters:
 
-  mtry  Accuracy   Kappa      Accuracy SD  Kappa SD  
-   2    0.7661585  0.7039798  0.03541543   0.04485759
-  34    0.7609265  0.6977762  0.03257624   0.04060441
-  67    0.7405003  0.6724544  0.03174584   0.03993815
+  mtry  Accuracy   Kappa      Accuracy SD  Kappa SD   
+   2    0.9896235  0.9868666  0.001494861  0.001891886
+  26    0.9899270  0.9872531  0.002038228  0.002571430
+  51    0.9827476  0.9781655  0.003699391  0.004677059
 
 Accuracy was used to select the optimal model using  the largest value.
-The final value used for the model was mtry = 2. 
+The final value used for the model was mtry = 26. 
 ```
    
 Here are the commands that I used to perform cross validation (step 4 above) and to estimate the error rate, along with the associated output from those command.
@@ -85,14 +79,14 @@ table(pred_final_validation,final_validation$classe)
 ```
 
 ```
-pred_final_validation  A  B  C  D  E
-                    A 27  5  0  2  0
-                    B  0 13  2  1  2
-                    C  0  1 14  0  0
-                    D  0  0  1 14  0
-                    E  0  0  0  0 17
+pred_final_validation    A    B    C    D    E
+                    A 1393   11    0    0    0
+                    B    1  937    6    0    0
+                    C    0    1  847    4    1
+                    D    0    0    2  799    1
+                    E    1    0    0    1  899
                                    
 ```
-**Per the matrix above, 85 of the predictions were accurate (e.g. the ones along the diagonal) and 14 were inaccurate.  Thus the error rate on the validation sample is 14/99=14%.  We can use this as an estimate of our Out of Error Sample Rate.**
+**Per the matrix above, 4875 of the predictions were accurate (e.g. the ones along the diagonal) and 29 were inaccurate.  Thus the error rate on the validation sample is 29/4875=0.6%%.  We can use this as an estimate of our Out of Error Sample Rate.**
 
 
